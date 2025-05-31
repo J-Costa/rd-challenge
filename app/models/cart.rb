@@ -1,4 +1,7 @@
 class Cart < ApplicationRecord
+  HOURS_TO_ABANDON = 3
+  DAYS_TO_REMOVE = 7
+
   has_many :cart_items, dependent: :destroy
   has_many :products, through: :cart_items
   
@@ -23,5 +26,18 @@ class Cart < ApplicationRecord
   def update_total_price
     self.total_price = cart_items.sum('current_price')
     save
+  end
+
+  def mark_as_abandoned
+    return if abandoned? && last_interaction_at >= HOURS_TO_ABANDON.hours.ago
+
+    toggle(:abandoned)
+    save
+  end
+
+  def remove_if_abandoned
+    return unless abandoned? && last_interaction_at < 7.days.ago
+
+    destroy
   end
 end
