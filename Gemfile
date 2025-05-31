@@ -18,8 +18,9 @@ gem 'guard-livereload', require: false
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
   gem 'rspec-rails', '~> 6.1.0'
+  gem "rubocop"
+  gem "brakeman"
 end
 
 group :development do
-  gem "rubocop"
 end
