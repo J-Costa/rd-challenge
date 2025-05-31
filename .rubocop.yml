@@ -38,6 +38,15 @@ Metrics/BlockLength:
     - 'spec/**/*'
     - 'config/routes.rb'
 
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+
+Rails/SkipsModelValidations:
+  Enabled: false
+
 Layout/LineLength:
   Max: 120
   Exclude:
