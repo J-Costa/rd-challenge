@@ -1,2 +1,7 @@
-one:
+without_items:
   total_price: 0
+
+with_items:
+  total_price: 12999.99
+
+  

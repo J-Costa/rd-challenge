@@ -6,4 +6,11 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   root "rails/health#show"
+
+  resources :carts, only: [:create], path: :cart do
+    collection do
+      get :show
+      post :add_item
+    end
+  end
 end
