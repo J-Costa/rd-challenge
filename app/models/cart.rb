@@ -7,6 +7,9 @@ class Cart < ApplicationRecord
 
   validates :total_price, numericality: { greater_than_or_equal_to: 0 }
 
+  scope :without_interaction, -> { where(last_interaction_at: ...HOURS_TO_ABANDON.hours.ago) }
+  scope :to_be_removed, -> { where(abandoned: true, last_interaction_at: ...DAYS_TO_REMOVE.days.ago) }
+
   def add_product(product_id, quantity = 1)
     find_or_create_cart_item(product_id, quantity)
     touch(:last_interaction_at)
@@ -17,6 +20,7 @@ class Cart < ApplicationRecord
     cart_item = cart_items.find_by(product_id: product_id)
     return unless cart_item
 
+    touch(:last_interaction_at)
     cart_item.remove_item
     update_total_price
   end

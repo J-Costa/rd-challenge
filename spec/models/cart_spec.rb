@@ -59,17 +59,21 @@ RSpec.describe Cart do
     end
 
     it 'updates quantity and total price when more than one quantity' do
+      cart_last_interaction = cart.last_interaction_at
       expect { cart.remove_product(product.id) }.not_to(change { cart.cart_items.count })
 
+      expect(cart.reload.last_interaction_at).to be > cart_last_interaction
       expect(cart.cart_items.count).to eq(1)
       expect(cart.total_price).to eq(10.0)
     end
 
-    it 'remove item when only one' do
+    it 'destroy cart_item when only have one quantity' do
       cart.remove_product(product.id)
+      cart_last_interaction = cart.last_interaction_at
 
       expect { cart.remove_product(product.id) }.to change { cart.cart_items.count }.by(-1)
 
+      expect(cart.reload.last_interaction_at).to be > cart_last_interaction
       expect(cart.cart_items.count).to eq(0)
       expect(cart.total_price).to eq(0)
     end
@@ -77,6 +81,26 @@ RSpec.describe Cart do
     it 'does not remove a product that is not in the cart' do
       another_product = Product.create(name: 'Another Product', price: 15.0)
       expect { cart.remove_product(another_product.id) }.not_to(change { cart.cart_items.count })
+    end
+  end
+
+  context 'with scopes' do
+    let!(:abandoned_cart) { described_class.create(total_price: 0, last_interaction_at: described_class::HOURS_TO_ABANDON.hours.ago, abandoned: true) }
+    let!(:active_cart) { described_class.create(total_price: 0, last_interaction_at: Time.current, abandoned: false) }
+    let!(:old_abandoned_cart) { described_class.create(total_price: 0, last_interaction_at: described_class::DAYS_TO_REMOVE.days.ago, abandoned: true) }
+
+    describe '.without_interaction' do
+      it 'returns carts without interaction for more than 3 hours' do
+        expect(described_class.without_interaction).to include(abandoned_cart)
+        expect(described_class.without_interaction).not_to include(active_cart)
+      end
+    end
+
+    describe '.to_be_removed' do
+      it 'returns abandoned carts older than 7 days' do
+        expect(described_class.to_be_removed).to include(old_abandoned_cart)
+        expect(described_class.to_be_removed).not_to include(abandoned_cart)
+      end
     end
   end
 end
