@@ -1,4 +1,4 @@
-class CartsController < ApplicationController 
+class CartsController < ApplicationController
   before_action :create_cart, only: [:create]
   before_action :set_cart, only: %i[show add_item]
 

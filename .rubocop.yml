@@ -54,3 +54,6 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/AnyInstance:
   Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
