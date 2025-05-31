@@ -7,25 +7,34 @@ class CartsController < ApplicationController
   end
 
   def create
-    @current_cart.add_product(cart_params[:product_id], cart_params[:quantity].to_i)
+    quantity = cart_params[:quantity].to_i
+    if quantity <= 0
+      return render json: { error: 'Quantity must be greater than 0' },
+                    status: :unprocessable_entity
+    end
+
+    @current_cart.add_product(cart_params[:product_id], quantity)
     render json: cart_body(@current_cart), status: :created
   end
 
   def add_item
-    @current_cart.add_product(cart_params[:product_id], cart_params[:quantity].to_i)
+    quantity = cart_params[:quantity].to_i
+    if quantity <= 0
+      return render json: { error: 'Quantity must be greater than 0' },
+                    status: :unprocessable_entity
+    end
+
+    @current_cart.add_product(cart_params[:product_id], quantity)
     render json: cart_body(@current_cart), status: :ok
   end
 
   def remove_item
     product_id = product_param
-    cart_item = @current_cart.cart_items.find_by(product_id: product_id)
+    product = @current_cart.products.find_by(id: product_id)
+    return render json: { error: 'Product not found in cart' }, status: :not_found unless product
 
-    if cart_item
-      cart_item.remove_item
-      render json: cart_body(@current_cart), status: :ok
-    else
-      render json: { error: 'Product not found in cart' }, status: :not_found
-    end
+    @current_cart.remove_product(product.id)
+    render json: cart_body(@current_cart), status: :ok
   end
 
   private
