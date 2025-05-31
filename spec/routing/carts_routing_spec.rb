@@ -1,6 +1,6 @@
-require "rails_helper"
+require 'rails_helper'
 
-RSpec.describe CartsController, type: :routing do
+RSpec.describe CartsController do
   describe 'routes' do
     it 'routes to #show' do
       expect(get: '/cart').to route_to('carts#show')
@@ -14,4 +14,4 @@ RSpec.describe CartsController, type: :routing do
       expect(post: '/cart/add_item').to route_to('carts#add_item')
     end
   end
-end 
+end

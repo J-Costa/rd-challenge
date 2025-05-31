@@ -1,7 +1,11 @@
 without_items:
   total_price: 0
+  last_interaction_at: <%= Time.current %>
+  abandoned: false
 
 with_items:
   total_price: 12999.99
+  last_interaction_at: <%= Time.current %>
+  abandoned: false
 
   
