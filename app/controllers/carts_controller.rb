@@ -6,16 +6,38 @@ class CartsController < ApplicationController
     render json: cart_body(@current_cart)
   end
 
+  # rubocop:disable Layout/LineLength
+  # @summary Cria ou atualiza o carrinho e salva na sessão
+  # @request_body Produto para adicionar ao carrinho [!Hash{product_id: String, quantity: Integer }]
+  # @request_body_example Produto e quantidades [Hash]{product_id: '475308017',quantity: 1}
+  # @response Se o carrinho foi criado com sucesso, retorna o carrinho (201) [!Hash{id: Integer, total_price: Float, products: Array<Hash{id: String, name: String, quantity: Integer, unit_price: Float, total_price: Float}>}]
+  # @response_example Exemplo de carrinho criado com sucesso (201) [Hash] {id: 475308017, total_price: 100.0, products: [{id: '12345', name: 'Product Name', quantity: 2, unit_price: 50.0, total_price: 100.0}]}
+  # rubocop:enable Layout/LineLength
   def create
     @current_cart.add_product(cart_params[:product_id], cart_params[:quantity].to_i)
     render json: cart_body(@current_cart), status: :created
   end
 
+  # rubocop:disable Layout/LineLength
+  # @summary Adicionar um item ao carrinho
+  # @request_body Produto para adicionar ao carrinho [!Hash{product_id: String, quantity: Integer }]
+  # @request_body_example Produto e quantidades [Hash]{product_id: '475308017',quantity: 1}
+  # @response Se o item foi adicionado com sucesso, retorna o carrinho atualizado (200) [!Hash{id: Integer, total_price: Float, products: Array<Hash{id: String, name: String, quantity: Integer, unit_price: Float, total_price: Float}>}]
+  # @response_example Exemplo de carrinho atualizado (200) [Hash] {id: 1, total_price: 100.0, products: [{id: '12345', name: 'Product Name', quantity: 2, unit_price: 50.0, total_price: 100.0}]}
+  # rubocop:enable Layout/LineLength
   def add_item
     @current_cart.add_product(cart_params[:product_id], cart_params[:quantity].to_i)
     render json: cart_body(@current_cart), status: :ok
   end
 
+  # rubocop:disable Layout/LineLength
+  # @summary remover um item ao carrinho
+  # @param product_id [String] ID do produto a ser removido do carrinho
+  # @response Se o item foi excluído com sucesso, retorna o carrinho (200) [!Hash{id: Integer, total_price: Float, products: Array<Hash{id: String, name: String, quantity: Integer, unit_price: Float, total_price: Float}>}]
+  # @response_example Exemplo de carrinho atualizado(200) [Hash] {id: 1, total_price: 100.0, products: [{id: '12345', name: 'Product Name', quantity: 2, unit_price: 50.0, total_price: 100.0}]}
+  # response Se o produto não foi encontrado no carrinho, retorna erro (404) [!Hash{error: String}]
+  # @response_example Exemplo de erro ao remover produto(404) [Hash] {error: 'Product not found in cart'}
+  # rubocop:enable Layout/LineLength
   def remove_item
     product_id = product_param
     cart_item = @current_cart.cart_items.find_by(product_id: product_id)
