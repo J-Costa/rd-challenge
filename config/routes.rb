@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     collection do
       get :show
       post :add_item
+      delete ':product_id', to: 'carts#remove_item', as: :remove_item
     end
   end
 end

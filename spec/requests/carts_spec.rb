@@ -4,7 +4,7 @@ RSpec.describe '/carts' do
   describe 'POST /add_item' do
     let(:cart) { Cart.create(total_price: 0, last_interaction_at: Time.current) }
     let(:product) { Product.create(name: 'Test Product', price: 10.0) }
-    let!(:cart_item) { CartItem.create(cart: cart, product: product, quantity: 1, current_price: product.price) }
+    let!(:cart_item) { CartItem.create(cart: cart, product: product, quantity: 1, total_price: product.price) }
 
     before do
       allow_any_instance_of(CartsController).to receive(:session).and_return(cart_id: cart.id)

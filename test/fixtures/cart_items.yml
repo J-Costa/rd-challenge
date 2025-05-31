@@ -2,4 +2,4 @@ one:
   cart: with_items
   product: s24
   quantity: 1
-  current_price: 12999.99
+  total_price: 12999.99
