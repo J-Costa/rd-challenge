@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_01_181051) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_01_213151) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -31,6 +31,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_01_181051) do
     t.datetime "updated_at", null: false
     t.datetime "last_interaction_at", null: false
     t.boolean "abandoned", default: false, null: false
+    t.index ["id", "abandoned", "last_interaction_at"], name: "index_carts_covering_for_jobs"
+    t.index ["last_interaction_at"], name: "index_carts_abandoned_by_last_interaction", where: "(abandoned = true)"
+    t.index ["last_interaction_at"], name: "index_carts_active_by_last_interaction", where: "(abandoned = false)"
   end
 
   create_table "products", force: :cascade do |t|
