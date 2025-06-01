@@ -46,4 +46,27 @@ RSpec.describe CartItem do
       expect(cart_item.cart.cart_items).not_to include(cart_item)
     end
   end
+
+  context 'when increasing quantity' do
+    let(:cart) { carts(:with_items) }
+    let(:product) { cart.products.first }
+    let(:cart_item) { cart.cart_items.first }
+
+    it 'increases the quantity by the specified amount' do
+      expect(cart_item.quantity).to eq(1)
+      expect { cart_item.increase_quantity!(2) }.to change(cart_item, :quantity).by(2)
+      expect(cart_item.quantity).to eq(3)
+      expect(cart_item.total_price).to eq(product.price * 3)
+    end
+
+    it 'raises an error if the amount is not a number' do
+      expect { cart_item.increase_quantity!('invalid') }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(cart_item.errors[:quantity]).to include('must be a number')
+    end
+
+    it 'raises an error if the amount is less than or equal to 0' do
+      expect { cart_item.increase_quantity!(0) }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(cart_item.errors[:quantity]).to include('must be greater than 0')
+    end
+  end
 end
