@@ -13,7 +13,7 @@ Caso você já possua o ruby instalado localmente, você pode executar o projeto
 
 
 ```bash
-docker compose up -d
+docker compose up db redis -d
 ```
 
 Este comando iniciará os seguintes serviços:
@@ -71,3 +71,11 @@ Para garantir a qualidade do código e a execução dos testes, implementei um p
 - Escaneamento de segurança com `brakeman`
 - Verificação de estilo de código com `rubocop`
 - Execução dos testes com `rspec`
+
+#### Docs via gem [oas_rails](https://github.com/a-chacon/oas_rails)
+A gem oas_rails é bem legal, por meio de comentários no controller é possível gerar docs para os endpoints de forma 'automática' ao estilo do que o FastAPI faz no Python.
+Apesar de "poluir" os controllers, a funcionalidade da gem é legal e pode até reduzir custos com ferramentas externas para documentação de API.
+
+Além de ser interativa e permitir testar o endpoint direto pela doc.
+Com o app rodando basta acessar `/docs` para poder visualizar:
+![image](https://github.com/user-attachments/assets/108b8012-7c9d-45d1-8d06-1fc0420866aa)
