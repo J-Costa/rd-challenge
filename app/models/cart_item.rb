@@ -9,6 +9,23 @@ class CartItem < ApplicationRecord
     self.total_price = product.price * quantity
   end
 
+  def increase_quantity!(amount)
+    if amount.nil? || !amount.is_a?(Numeric)
+      errors.add(:quantity, 'must be a number')
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    if amount <= 0
+      errors.add(:quantity, 'must be greater than 0')
+      raise ActiveRecord::RecordInvalid, self
+    end
+
+    self.quantity += amount
+    update_total_price
+
+    save!
+  end
+
   def remove_item
     self.quantity -= 1
 

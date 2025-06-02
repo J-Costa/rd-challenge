@@ -1,0 +1,14 @@
+{
+    "name": "rd-challenge dev container",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "rd-challenge",
+    "workspaceFolder": "/workspaces/rd-challenge",
+    "features": {
+        "ghcr.io/devcontainers/features/ruby:1": {
+            "version": "3.3.1"
+        }
+    },
+    "forwardPorts": [6379, 5432, 3000],
+    "postCreateCommand": "bundle install && bin/rails db:setup",
+    "remoteUser": "rails"
+}

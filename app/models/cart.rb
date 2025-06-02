@@ -7,16 +7,20 @@ class Cart < ApplicationRecord
 
   validates :total_price, numericality: { greater_than_or_equal_to: 0 }
 
-  def add_product(product_id, quantity = 1)
-    find_or_create_cart_item(product_id, quantity)
+  scope :without_interaction, -> { where(abandoned: false, last_interaction_at: ...HOURS_TO_ABANDON.hours.ago) }
+  scope :to_be_removed, -> { where(abandoned: true, last_interaction_at: ...DAYS_TO_REMOVE.days.ago) }
+
+  def add_product!(product_id, quantity = 1)
+    find_or_create_cart_item!(product_id, quantity)
     touch(:last_interaction_at)
     update_total_price
   end
 
-  def remove_product(product_id)
+  def remove_product!(product_id)
     cart_item = cart_items.find_by(product_id: product_id)
-    return unless cart_item
+    raise ActiveRecord::RecordNotFound, "Product with id `#{product_id}` not found in cart" unless cart_item
 
+    touch(:last_interaction_at)
     cart_item.remove_item
     update_total_price
   end
@@ -29,7 +33,7 @@ class Cart < ApplicationRecord
   def mark_as_abandoned
     return if abandoned? && last_interaction_at >= HOURS_TO_ABANDON.hours.ago
 
-    toggle(:abandoned)
+    self.abandoned = true
     save
   end
 
@@ -41,17 +45,13 @@ class Cart < ApplicationRecord
 
   private
 
-  def find_or_create_cart_item(product_id, quantity)
+  def find_or_create_cart_item!(product_id, quantity)
     product = Product.find(product_id)
-    cart_item = cart_items.find_by(product_id: product_id)
+    cart_item = cart_items.find_or_create_by(product: product)
 
-    if cart_item
-      cart_item.quantity += quantity
-    else
-      cart_item = cart_items.build(product: product, quantity: quantity)
-    end
+    cart_item.increase_quantity!(quantity)
 
     cart_item.update_total_price
-    cart_item.save
+    cart_item.save!
   end
 end

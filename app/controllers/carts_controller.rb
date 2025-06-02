@@ -1,5 +1,5 @@
 class CartsController < ApplicationController
-  before_action :create_cart, only: [:create]
+  include ApiErrorFormatter
   before_action :set_cart, only: %i[show add_item remove_item]
 
   def show
@@ -13,9 +13,21 @@ class CartsController < ApplicationController
   # @response Se o carrinho foi criado com sucesso, retorna o carrinho (201) [!Hash{id: Integer, total_price: Float, products: Array<Hash{id: String, name: String, quantity: Integer, unit_price: Float, total_price: Float}>}]
   # @response_example Exemplo de carrinho criado com sucesso (201) [Hash] {id: 475308017, total_price: 100.0, products: [{id: '12345', name: 'Product Name', quantity: 2, unit_price: 50.0, total_price: 100.0}]}
   # rubocop:enable Layout/LineLength
-  def create
-    @current_cart.add_product(cart_params[:product_id], cart_params[:quantity].to_i)
-    render json: cart_body(@current_cart), status: :created
+  def create # rubocop:disable Metrics/AbcSize
+    current_cart = Cart.find_by(id: session[:cart_id])
+    if current_cart
+      render json: cart_body(current_cart), status: :ok
+    else
+      Cart.transaction do
+        current_cart = Cart.create!(total_price: 0, last_interaction_at: Time.current)
+        current_cart.add_product!(cart_params[:product_id], cart_params[:quantity])
+        session[:cart_id] = current_cart.id
+
+        render json: cart_body(current_cart), status: :created
+      end
+    end
+  rescue ActiveRecord::ActiveRecordError => e
+    render json: api_error_formatter(e), status: :unprocessable_entity
   end
 
   # rubocop:disable Layout/LineLength
@@ -26,7 +38,7 @@ class CartsController < ApplicationController
   # @response_example Exemplo de carrinho atualizado (200) [Hash] {id: 1, total_price: 100.0, products: [{id: '12345', name: 'Product Name', quantity: 2, unit_price: 50.0, total_price: 100.0}]}
   # rubocop:enable Layout/LineLength
   def add_item
-    @current_cart.add_product(cart_params[:product_id], cart_params[:quantity].to_i)
+    @current_cart.add_product!(cart_params[:product_id], cart_params[:quantity])
     render json: cart_body(@current_cart), status: :ok
   end
 
@@ -39,15 +51,11 @@ class CartsController < ApplicationController
   # @response_example Exemplo de erro ao remover produto(404) [Hash] {error: 'Product not found in cart'}
   # rubocop:enable Layout/LineLength
   def remove_item
-    product_id = product_param
-    cart_item = @current_cart.cart_items.find_by(product_id: product_id)
+    @current_cart.remove_product!(product_param)
 
-    if cart_item
-      cart_item.remove_item
-      render json: cart_body(@current_cart), status: :ok
-    else
-      render json: { error: 'Product not found in cart' }, status: :not_found
-    end
+    render json: cart_body(@current_cart), status: :ok
+  rescue ActiveRecord::ActiveRecordError => e
+    render json: api_error_formatter(e), status: :unprocessable_entity
   end
 
   private
@@ -58,14 +66,6 @@ class CartsController < ApplicationController
 
   def product_param
     params.require(:product_id)
-  end
-
-  def create_cart
-    @current_cart = Cart.find_by(id: session[:cart_id])
-    return session[:cart_id] = @current_cart.id if @current_cart
-
-    @current_cart = Cart.create(total_price: 0, last_interaction_at: Time.current)
-    session[:cart_id] = @current_cart.id
   end
 
   def set_cart
