@@ -116,10 +116,21 @@ RSpec.describe '/carts' do
       let(:non_existent_product) { Product.create(name: 'Non-existent Product', price: 15.0) }
 
       it 'returns a product not found' do
+        expect(cart.cart_items.where(product_id: non_existent_product.id)).to be_empty
+
         delete remove_item_carts_path(non_existent_product)
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.body).to include('Product not found')
+      end
+    end
+
+    context 'when the product_id is not provided' do
+      it 'returns a bad request response' do
+        delete '/cart/'
+
+        expect(response).to have_http_status(:bad_request)
+        expect(response.body).to include('Product ID is required to remove an item from cart')
       end
     end
   end
