@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       get :show
       post :add_item
       delete ':product_id', to: 'carts#remove_item', as: :remove_item
+      delete '/', to: 'carts#render_missing_param', as: :render_missing_param
     end
   end
 end
