@@ -1,6 +1,22 @@
 version: '3'
 
 services:
+    rd-challenge:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - .:/workspaces/rd-challenge
+        ports:
+            - '3000:3000'
+        depends_on:
+            - db
+            - redis
+        environment:
+            - DATABASE_URL=postgresql://postgres:password@db:5432/store_development
+            - REDIS_URL=redis://redis:6379/0
+        command: sleep infinity
+        
     db:
         image: postgres:16-alpine
         environment:
